@@ -1,8 +1,9 @@
 import React,{useEffect, useState} from 'react';
 import '../styles/loginview.css';
+
 function Login(){
+
     const Web3 = require('web3');
-    var web3 = new Web3(Web3.givenProvider || 'ws://some.local-or-remote.node:8546');
     let [ready, setReady]= useState('Metamask is not installed');
     let [Address, setAddress] = useState(null);
     let [token, setToken] = useState(null)

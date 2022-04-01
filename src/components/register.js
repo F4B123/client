@@ -1,8 +1,5 @@
 import React,{useEffect, useState} from 'react';
 
-//TODO: not use windowslocal storage
-//TODO: connect with the API
-
 function Register(){
 
     const Web3 = require('web3');
@@ -66,7 +63,7 @@ function Register(){
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({address: address})
-        })
+        }).then((res)=>{console.log(res)})
     }
 
     function ShowInfo(){

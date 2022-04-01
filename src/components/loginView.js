@@ -31,8 +31,7 @@ function LoginView(){
                         <img className="mt-4 mb-4" src={Logo} height=""/>
                         <h1 className="h2">Sign in</h1>
                         <p>{!data? "loading..": data}</p>    
-                        <Register/>
-                        <Login/>
+                        <LogandReg/>
                     </form>
                 </div>
             </div>

@@ -21,6 +21,7 @@ function LogandReg(){
 
     //Initialize web3 connected to ETH
     const start = async() =>{
+        console.log(window.ethereum)
         if(window.ethereum){
             window.web3 = new Web3(window.ethereum);
             try{
@@ -29,13 +30,12 @@ function LogandReg(){
                 console.error("error");
             }
         }
-        
         //load in Localstorage
         window.userAddress = window.localStorage.getItem('userAddress');
-
     }
 
-    function toogleButton(functionality){
+    function toogleButton(e,functionality){
+        e.preventDefault()
         if (ready === 'Register'){
             start()
             loginWithEth(functionality);
@@ -59,23 +59,27 @@ function LogandReg(){
                 console.error("error")
             }
         }
-        
     }
 
-    function connectApiRegister(address){
-        fetch("/register", {
+    async function connectApiRegister(address){
+        await fetch("http://localhost:3001/register", {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({address: address})
-        }).then((res)=>res.json())
-        .then((data)=>console.log(data))
+        }).then((res)=> res.json())
+        .then((data)=> {
+            if (data.msg){
+                window.alert(data.msg)
+            }
+        })
     }
 
+
     async function connectApiLogin(address){
-        await fetch("/login", {
+        await fetch("http://localhost:3001/login", {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -83,7 +87,15 @@ function LogandReg(){
         },
         body: JSON.stringify({address: address})
         })
-        .then(handleSignMessage(address))
+        .then((res)=> res.json())
+        .then((data) => {
+            //getnonce(address)
+            //handleSignMessage(address,data.nonce)
+        })
+
+    }
+    async function handleNonce (address){
+        
     }
 
     async function handleSignMessage (address) {
@@ -92,9 +104,8 @@ function LogandReg(){
             address,
             (err, signature) => {
               if (err) return reject(err);
-              //send data to API to verify
               resolve(  
-                 fetch(`/login`, 
+                 fetch(`http://localhost:3001/login`, 
                  {
                     method: 'POST',
                     headers: {
@@ -104,7 +115,8 @@ function LogandReg(){
                     body: JSON.stringify({
                         address:address,
                         signature:signature})
-                })//.then((res)=> setToken(res.token))
+                }).then((res)=> res.json())
+                .then((data)=> window.alert(data.loged))        //function that shows that i'm loged
                 );
             }
           )
@@ -112,14 +124,23 @@ function LogandReg(){
 
     } 
 
+
+    function Loged(){
+        return(
+            <>
+                <p>You have logIn</p>
+            </>
+        )
+    }
     function ShowInfo(){
+        console.log(window.ethereum)
         if(typeof window.ethereum !== 'undefined'){
             return(
                 <><div className='mt-4 mb-4'>
-                    <button className='btn btn-lg btn-primary' onClick={() => toogleButton("register")} id="button-1">Register</button>
+                    <button className='btn btn-lg btn-primary' onClick={(e) => toogleButton(e,"register")} id="button-1">Register</button>
                 </div>
                 <div className='mt-4 mb-4'>
-                    <button className='btn btn-lg btn-primary' onClick={() => toogleButton("login")} id="button-1">Login</button>
+                    <button className='btn btn-lg btn-primary' onClick={(e) => toogleButton(e,"login")} id="button-1">Login</button>
                 </div>    
                 </>
             )  

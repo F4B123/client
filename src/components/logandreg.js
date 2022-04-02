@@ -90,18 +90,34 @@ function LogandReg(){
         .then((res)=> res.json())
         .then((data) => {
             //getnonce(address)
-            //handleSignMessage(address,data.nonce)
+            handleNonce(address)
+            //handleSignMessage(address)
         })
 
     }
-    async function handleNonce (address){
-        
+
+    async function handleNonce(address){
+        console.log("ARRIVED")
+        await fetch("http://localhost:3001/nonce", {
+            method:'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({address: address})
+
+        }).then((res)=> res.json())
+        .then((data)=>{
+            console.log(data.nonce)
+            handleSignMessage(address,data.nonce)
+        })
     }
 
-    async function handleSignMessage (address) {
+    async function handleSignMessage (address,nonce) {
         return new Promise((resolve, reject) =>
-            personal.sign("I am loging in:",
+            personal.sign(`I am loging with nonce:${nonce}`,
             address,
+            nonce,
             (err, signature) => {
               if (err) return reject(err);
               resolve(  
@@ -114,6 +130,7 @@ function LogandReg(){
                     },
                     body: JSON.stringify({
                         address:address,
+                        nonce:nonce,
                         signature:signature})
                 }).then((res)=> res.json())
                 .then((data)=> window.alert(data.loged))        //function that shows that i'm loged

@@ -8,6 +8,7 @@ function LogandReg(){
     var Personal = require('web3-eth-personal');
     var personal = new Personal(Personal.givenProvider || 'ws://some.local-or-remote.node:8546');
     window.userAddress = null;
+    window.nonce = window.localStorage.getItem('nonce');
     
     useEffect(() => {
         if (typeof window.ethereum !== 'undefined') {
@@ -52,7 +53,8 @@ function LogandReg(){
                     connectApiRegister(accounts[0])
                 }
                 else if (f == "login"){
-                    connectApiLogin(accounts[0])
+                    //connectApiLogin(accounts[0])
+                    handleSignMessage(accounts[0])
                 }
                 
             } catch{
@@ -62,7 +64,7 @@ function LogandReg(){
     }
 
     async function connectApiRegister(address){
-        await fetch("http://localhost:3001/register", {
+        await fetch("http://localhost:3001/login/nonce", {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
@@ -71,90 +73,63 @@ function LogandReg(){
         body: JSON.stringify({address: address})
         }).then((res)=> res.json())
         .then((data)=> {
-            if (data.msg){
-                window.alert(data.msg)
+            console.log(address)
+            console.log(data)
+            if (data.nonce){
+                window.localStorage.setItem('nonce', data.nonce);
+                window.alert(data.nonce)
+            }
+            else{
+                window.alert("Nonce not found")
             }
         })
+        // fetch('http://localhost:3001/login/nonce', {
+        //     method: 'POST',
+        //     body: new URLSearchParams({
+        //         'address': address,
+        //         'password': 'Password!',
+        //         'grant_type': 'password'
+        //     })
+        // });
     }
 
 
-    async function connectApiLogin(address){
-        await fetch("http://localhost:3001/login", {
+
+    async function handleSignMessage (address) {
+
+        // await fetch("http://bcca-190-24-101-161.ngrok.io/login/login", {
+        // method: "POST",
+        // headers: {
+        // Accept: "application/json",
+        // "Content-Type": "application/json",
+        // },
+        // body: JSON.stringify({
+        // signature: await personal.sign(
+        //     "Signing nonce: " + window.nonce,
+        //     address
+        // ),
+        // address: address,
+        // }),
+        // }).then((res) => res.json())
+        // .then((data)=>window.alert(data.token))
+        fetch('http://localhost:3001/login/login', {
         method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({address: address})
+        body: new URLSearchParams({
+            'address': address,
+            'signature': await personal.sign(
+                    "Signing nonce: " + window.nonce,
+                    address
+                ),
         })
-        .then((res)=> res.json())
-        .then((data) => {
-            //getnonce(address)
-            handleNonce(address)
-            //handleSignMessage(address)
-        })
-
-    }
-
-    async function handleNonce(address){
-        console.log("ARRIVED")
-        await fetch("http://localhost:3001/nonce", {
-            method:'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({address: address})
-
-        }).then((res)=> res.json())
-        .then((data)=>{
-            console.log(data.nonce)
-            handleSignMessage(address,data.nonce)
-        })
-    }
-
-    async function handleSignMessage (address,nonce) {
-        return new Promise((resolve, reject) =>
-            personal.sign(`I am loging with nonce:${nonce}`,
-            address,
-            nonce,
-            (err, signature) => {
-              if (err) return reject(err);
-              resolve(  
-                 fetch(`http://localhost:3001/login`, 
-                 {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        address:address,
-                        nonce:nonce,
-                        signature:signature})
-                }).then((res)=> res.json())
-                .then((data)=> window.alert(data.loged))        //function that shows that i'm loged
-                );
-            }
-          )
-        );
-
+    });
     } 
 
-
-    function Loged(){
-        return(
-            <>
-                <p>You have logIn</p>
-            </>
-        )
-    }
     function ShowInfo(){
         console.log(window.ethereum)
         if(typeof window.ethereum !== 'undefined'){
             return(
                 <><div className='mt-4 mb-4'>
-                    <button className='btn btn-lg btn-primary' onClick={(e) => toogleButton(e,"register")} id="button-1">Register</button>
+                    <button className='btn btn-lg btn-primary' onClick={(e) => toogleButton(e,"register")} id="button-1">get Nonce</button>
                 </div>
                 <div className='mt-4 mb-4'>
                     <button className='btn btn-lg btn-primary' onClick={(e) => toogleButton(e,"login")} id="button-1">Login</button>
@@ -174,7 +149,7 @@ function LogandReg(){
         <div className='container-component'>
             <div className='login-card'>
                 <div className='sign-in-container'>
-                    <p>Login or Register</p>
+                    <p>to update the nonce, click on get nonce and then reload the page</p>
                     <ShowInfo/>
                 </div>
             </div>     

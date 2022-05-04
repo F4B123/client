@@ -8,9 +8,9 @@ function LoginView(){
     const [data, setData] = React.useState(null);
 
     React.useEffect(()=> {
-        fetch("http://localhost:3001/api")
+        fetch("http://localhost:3002/firebase/test")
         .then((res)=>res.json())
-        .then((data)=>setData(data.message))
+        .then((data)=>setData(data.res))
     })
     //----------------------
 
